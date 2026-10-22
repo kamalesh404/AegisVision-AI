@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# YOLO / Ultralytics
+runs/
+*.pt
+
+# Sample alert snapshots (keep directory and csv template)
+alerts/*.jpg
+alerts/*.png
+!alerts/incident_audit_log.csv
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

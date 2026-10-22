@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AegisVision AI — Enterprise Spatial Analytics</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- TOPBAR                                                      -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <span class="logo-icon">◈</span>
+      <div>
+        <div class="logo-title">AEGIS VISION</div>
+        <div class="logo-subtitle">Enterprise Spatial Analytics</div>
+      </div>
+    </div>
+
+    <div class="mode-selector" id="modeSelector">
+      <!-- Populated by JS -->
+    </div>
+
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" id="btnSnapshot" title="Download Snapshot (S)">📸 Snapshot</button>
+      <button class="btn btn-ghost" id="btnReset" title="Reset Counters (R)">🔄 Reset</button>
+      <button class="btn btn-ghost" id="btnExportCSV" title="Export Incident Log">📥 Export</button>
+      <button class="btn btn-ghost btn-help" id="btnHelp" title="Keyboard Shortcuts (?)">?</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- MAIN LAYOUT: Video + Sidebar                                -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="main-content">
+
+    <!-- ─────────────── Video Container ─────────────── -->
+    <div class="video-container" id="videoContainer">
+      <div class="video-badge live-badge"><span class="pulse-dot"></span> LIVE</div>
+      <div class="video-badge fps-badge" id="fpsBadge">-- FPS</div>
+      <div class="video-badge model-badge" id="modelBadge">YOLOv8n</div>
+      <img id="videoFeed" alt="Video Feed">
+      <div class="video-overlay-msg" id="videoOverlayMsg" style="display:none;">
+        <span>⏸️ PAUSED</span>
+      </div>
+    </div>
+
+    <!-- ─────────────── Sidebar ─────────────── -->
+    <aside class="sidebar">
+
+      <!-- Stat Cards -->
+      <div class="stat-cards-grid">
+        <div class="stat-card">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-value" id="statFps">--</div>
+          <div class="stat-label">FPS</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-value" id="statTracks">0</div>
+          <div class="stat-label">Active Tracks</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🧠</div>
+          <div class="stat-value" id="statInference">--</div>
+          <div class="stat-label">Inference (ms)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔢</div>
+          <div class="stat-value" id="statCrossings">0</div>
+          <div class="stat-label">Total Crossings</div>
+        </div>
+      </div>
+
+      <!-- Configuration Panel -->
+      <div class="config-panel">
+        <div class="section-title">⚙️ Configuration</div>
+
+        <div class="config-row">
+          <label>Model</label>
+          <select class="select-styled" id="modelSelect">
+            <option value="yolov8n">YOLOv8 Nano (Fastest)</option>
+            <option value="yolov8s">YOLOv8 Small</option>
+            <option value="yolov8m">YOLOv8 Medium</option>
+            <option value="yolov8l">YOLOv8 Large</option>
+            <option value="yolov8x">YOLOv8 XLarge (Best)</option>
+          </select>
+        </div>
+
+        <div class="config-row">
+          <label>Video Source</label>
+          <div class="source-input-group">
+            <input type="text" class="source-input" id="sourceInput" placeholder="0, video.mp4, or rtsp://..." value="0">
+            <button class="btn btn-primary btn-sm" id="btnConnect">Connect</button>
+          </div>
+        </div>
+
+        <div class="config-row toggle-row">
+          <label>Motion Trails</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleTrails" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="config-row toggle-row">
+          <label>Heatmap Overlay</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleHeatmap" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="config-row toggle-row">
+          <label>Object IDs</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleIds" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="config-row toggle-row">
+          <label>Confidence</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleConfidence" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="config-row">
+          <button class="btn btn-warning btn-full" id="btnPause">⏸️ Pause</button>
+        </div>
+      </div>
+
+      <!-- Object Distribution Chart -->
+      <div class="chart-container">
+        <div class="section-title">📊 Object Distribution</div>
+        <canvas id="chartDistribution"></canvas>
+      </div>
+
+      <!-- Crossing Timeline Chart -->
+      <div class="chart-container">
+        <div class="section-title">📈 Crossing Timeline</div>
+        <canvas id="chartTimeline"></canvas>
+      </div>
+
+    </aside>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- BOTTOM PANEL — Incident & Alert Log                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="bottom-panel">
+    <div class="bottom-header">
+      <div class="section-title">📋 Incident &amp; Alert Log</div>
+      <div class="bottom-actions">
+        <span class="event-count" id="eventCount">0 events</span>
+      </div>
+    </div>
+    <div class="incident-table-wrapper">
+      <table class="incident-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Event ID</th>
+            <th>Type</th>
+            <th>Severity</th>
+            <th>Object</th>
+            <th>Zone / Line</th>
+            <th>Dwell (s)</th>
+          </tr>
+        </thead>
+        <tbody id="incidentTableBody">
+          <tr class="empty-row"><td colspan="7">No incidents recorded yet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- TOAST CONTAINER                                             -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- KEYBOARD SHORTCUTS MODAL                                    -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="shortcutsModal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>⌨️ Keyboard Shortcuts</h3>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <table class="shortcuts-table">
+          <tbody>
+            <tr>
+              <td><kbd>Space</kbd></td>
+              <td>Pause / Resume video feed</td>
+            </tr>
+            <tr>
+              <td><kbd>S</kbd></td>
+              <td>Download current frame snapshot</td>
+            </tr>
+            <tr>
+              <td><kbd>R</kbd></td>
+              <td>Reset all counters</td>
+            </tr>
+            <tr>
+              <td><kbd>E</kbd></td>
+              <td>Export incident log as CSV</td>
+            </tr>
+            <tr>
+              <td><kbd>T</kbd></td>
+              <td>Toggle motion trails</td>
+            </tr>
+            <tr>
+              <td><kbd>H</kbd></td>
+              <td>Toggle heatmap overlay</td>
+            </tr>
+            <tr>
+              <td><kbd>I</kbd></td>
+              <td>Toggle object IDs</td>
+            </tr>
+            <tr>
+              <td><kbd>C</kbd></td>
+              <td>Toggle confidence scores</td>
+            </tr>
+            <tr>
+              <td><kbd>1</kbd> – <kbd>4</kbd></td>
+              <td>Switch detection mode</td>
+            </tr>
+            <tr>
+              <td><kbd>?</kbd></td>
+              <td>Show / hide this help</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SCRIPTS                                                     -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="/static/js/app.js"></script>
+
+</body>
+</html>
