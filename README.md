@@ -185,4 +185,4 @@ MIT License — free for commercial and academic use.
 
 ---
 
-*Built with ❤️ by AegisVision AI*
+*Built with ❤️ 
