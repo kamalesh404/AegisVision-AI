@@ -67,6 +67,19 @@ class ConfigRequest(BaseModel):
     paused: Optional[bool] = None
 
 
+class ZoneAddRequest(BaseModel):
+    label: str = "Custom Restricted Zone"
+    points: list[list[int]]
+    color: Optional[list[int]] = [0, 0, 255]
+
+
+class TripwireAddRequest(BaseModel):
+    label: str = "Custom Tripwire"
+    pt1: list[int]
+    pt2: list[int]
+
+
+
 # ---------------------------------------------------------------------------
 # Application state
 # ---------------------------------------------------------------------------
@@ -575,6 +588,85 @@ async def api_snapshot():
             "Content-Disposition": f'attachment; filename="aegisvision_snapshot_{int(time.time())}.jpg"'
         },
     )
+
+
+@app.get("/api/zones")
+async def api_get_zones():
+    """Return all active geofence zones."""
+    return JSONResponse({
+        "zones": [
+            {
+                "id": z.zone_id,
+                "label": z.label,
+                "points": z.points.tolist(),
+                "total_intrusions": z.total_intrusions,
+                "active_intrusions": len(z.active_intrusions),
+            }
+            for z in state.zones
+        ]
+    })
+
+
+@app.post("/api/zones")
+async def api_add_zone(body: ZoneAddRequest):
+    """Add a new custom polygon geofence zone."""
+    if len(body.points) < 3:
+        raise HTTPException(status_code=400, detail="Polygon must have at least 3 points.")
+    zone_id = f"custom_zone_{int(time.time() * 1000) % 100000}"
+    new_zone = GeofenceZone(
+        zone_id=zone_id,
+        polygon_points=body.points,
+        label=body.label,
+        color=tuple(body.color or [0, 0, 255]),
+    )
+    state.zones.append(new_zone)
+    return JSONResponse({"status": "ok", "zone_id": zone_id, "label": new_zone.label})
+
+
+@app.delete("/api/zones/{zone_id}")
+async def api_delete_zone(zone_id: str):
+    """Remove a geofence zone by ID."""
+    state.zones = [z for z in state.zones if z.zone_id != zone_id]
+    return JSONResponse({"status": "ok", "deleted": zone_id})
+
+
+@app.get("/api/tripwires")
+async def api_get_tripwires():
+    """Return all active tripwire lines."""
+    return JSONResponse({
+        "tripwires": [
+            {
+                "id": tw.line_id,
+                "label": tw.label,
+                "pt1": list(tw.pt1),
+                "pt2": list(tw.pt2),
+                "in_count": tw.in_count,
+                "out_count": tw.out_count,
+            }
+            for tw in state.tripwires
+        ]
+    })
+
+
+@app.post("/api/tripwires")
+async def api_add_tripwire(body: TripwireAddRequest):
+    """Add a new custom tripwire line."""
+    line_id = f"custom_tw_{int(time.time() * 1000) % 100000}"
+    new_tw = TripwireLine(
+        line_id=line_id,
+        pt1=tuple(body.pt1),
+        pt2=tuple(body.pt2),
+        label=body.label,
+    )
+    state.tripwires.append(new_tw)
+    return JSONResponse({"status": "ok", "line_id": line_id, "label": new_tw.label})
+
+
+@app.delete("/api/tripwires/{line_id}")
+async def api_delete_tripwire(line_id: str):
+    """Remove a tripwire line by ID."""
+    state.tripwires = [tw for tw in state.tripwires if tw.line_id != line_id]
+    return JSONResponse({"status": "ok", "deleted": line_id})
 
 
 if __name__ == "__main__":
