@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  aegisvision:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aegisvision-ai
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./alerts:/app/alerts
+      - ./samples:/app/samples
+    # Optional GPU acceleration for NVIDIA hardware (uncomment below):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]

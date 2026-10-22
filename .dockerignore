@@ -1,0 +1,13 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.git
+.gitignore
+.env
+.venv
+venv/
+*.pt
+.pytest_cache/
+alerts/*.jpg
+alerts/*.png
