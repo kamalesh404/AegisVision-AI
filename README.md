@@ -2,10 +2,12 @@
 
 > **Industry-grade, competition-winning Computer Vision platform powered by YOLOv8 + FastAPI + Real-Time Multi-Object Tracking**
 
+[![CI Pipeline](https://github.com/kamalesh404/AegisVision-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/kamalesh404/AegisVision-AI/actions)
+![Tests](https://img.shields.io/badge/Tests-14%20Passed-brightgreen?logo=pytest)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![YOLOv8](https://img.shields.io/badge/YOLOv8-Ultralytics-00FFFF?logo=yolo)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?logo=fastapi)
-![OpenCV](https://img.shields.io/badge/OpenCV-5.x-5C3EE8?logo=opencv)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?logo=fastapi)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
@@ -16,98 +18,189 @@
 |---------|-------------|
 | 🔄 **Real-Time MOT** | Centroid + IoU multi-object tracker with persistent ID assignment and motion trails |
 | 📐 **Spatial Math** | Ray-segment intersection for bi-directional tripwire counting; Point-in-Polygon for geofence intrusion |
-| 🧠 **Dynamic Model Switching** | Hot-swap between YOLOv8n/s/m/l/x without restart |
+| 🧠 **Dynamic Model Switching** | Hot-swap between YOLOv8n/s/m/l/x without restarting the application |
 | 🎯 **4 Industry Modes** | Safety, Traffic, Retail, Security — each with pre-configured analytics profiles |
-| 🔥 **Live Heatmaps** | Temporal decay heatmap accumulator with JET colormap overlay |
-| 🚨 **Incident Management** | Auto-snapshot evidence capture, severity classification, CSV audit trail |
-| 🖥️ **Control Room Dashboard** | Dark glassmorphism UI with real-time charts, stat cards, and incident table |
-| ⌨️ **Keyboard Shortcuts** | Professional hotkeys (Space=pause, S=snapshot, H=heatmap, 1-4=modes) |
+| 🔥 **Live Heatmaps** | Temporal decay heatmap accumulator with JET colormap alpha overlay |
+| 🚨 **Incident Management** | Auto-snapshot evidence capture, severity classification, and CSV audit trail |
+| 🖥️ **Control Room Dashboard** | Dark glassmorphism UI with real-time Chart.js telemetry, stat cards, and incident table |
+| 🎮 **Procedural Simulation** | Built-in synthetic test stream generator for instant zero-camera demonstrations |
+| 🐳 **Production Docker** | Multi-stage Docker container with healthcheck and docker-compose orchestration |
+| 🧪 **Tested & Automated** | 100% pytest test suite + GitHub Actions CI/CD pipeline |
 
 ---
 
-## 📐 Architecture
+## 📐 System Architecture
 
 ```
-┌──────────────────────────────────────────────────────┐
-│                   FastAPI Server                      │
-│                                                      │
-│  ┌──────────┐  ┌───────────┐  ┌──────────────────┐  │
-│  │ YOLO     │→ │ Centroid  │→ │ Spatial Engine   │  │
-│  │ Engine   │  │ IoU       │  │ ├─ Tripwires     │  │
-│  │ (detect) │  │ Tracker   │  │ ├─ Geofences     │  │
-│  │          │  │ (MOT)     │  │ └─ Heatmap       │  │
-│  └──────────┘  └───────────┘  └──────────────────┘  │
-│       │              │               │               │
-│       └──────────────┴───────────────┘               │
-│                      │                               │
-│              ┌───────┴────────┐                      │
-│              │  HUD Renderer  │                      │
-│              │  + Violation   │                      │
-│              │    Manager     │                      │
-│              └───────┬────────┘                      │
-│                      │                               │
-│              ┌───────┴────────┐                      │
-│              │  MJPEG Stream  │ → Browser Dashboard  │
-│              └────────────────┘                      │
-└──────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                   AegisVision AI — Pipeline Flow                       │
+├────────────────────────────────────────────────────────────────────────┤
+│  [Video Input Feed]                                                    │
+│   Webcam / File / RTSP / Procedural Simulator                         │
+│         │                                                              │
+│         ▼                                                              │
+│  [YOLOv8 Detection Engine]                                             │
+│   Confidence Filter + Class Filter + NMS                               │
+│         │                                                              │
+│         ▼                                                              │
+│  [Centroid + IoU MOT Tracker]                                          │
+│   Euclidean Distance Matrix + IoU Gating + ID Ring Buffer History      │
+│         │                                                              │
+│         ▼                                                              │
+│  [Spatial Analytics Engine]                                            │
+│   ├── Bi-Directional Tripwires (IN/OUT ray crossing vector math)       │
+│   ├── Geofence Zones (Point-in-Polygon intrusion detection)            │
+│   └── Heatmap Accumulator (Temporal decay dwell density)               │
+│         │                                                              │
+│         ▼                                                              │
+│  [Incident & Audit Manager] ───► Snapshot evidence & CSV audit logs    │
+│         │                                                              │
+│         ▼                                                              │
+│  [MJPEG Video Stream + REST API + Chart.js Control Room Dashboard]     │
+└────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## ⚡ Performance Benchmark Scorecard
+
+Evaluated on standard CPU hardware (*Intel/AMD x86_64, 12 Threads, 16GB RAM*):
+
+| Component | Metric | Score | Status |
+| :--- | :--- | :--- | :--- |
+| **YOLOv8n Inference** | Mean Latency | **42.68 ms** | 🟢 Real-Time |
+| **YOLOv8n Inference** | P50 Median Latency | **43.03 ms** | 🟢 Real-Time |
+| **YOLOv8n Inference** | P90 Tail Latency | **44.44 ms** | 🟢 Real-Time |
+| **YOLOv8n Inference** | Max Theoretical FPS | **23.4 FPS** | 🟢 Real-Time |
+| **Centroid + IoU Tracker** | 100 Concurrent Objects Latency | **23.80 ms** | 🚀 Ultra-Fast |
+| **Spatial Geofencing** | Point-in-Polygon Checks | **655,860 ops/sec** | 🚀 Vectorized |
+
+> Run the automated benchmark anytime with `python benchmark.py` to generate an updated [`BENCHMARK.md`](BENCHMARK.md).
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Install Dependencies
+### Option A: Local Python Run
+
+1. **Clone the repository**:
+```bash
+git clone https://github.com/kamalesh404/AegisVision-AI.git
+cd AegisVision-AI
+```
+
+2. **Install dependencies**:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Run the Server
+3. **Launch with auto-browser opening**:
 ```bash
-python app.py
+python run.py
+```
+*(Or on Windows, double-click `start.bat`)*
+
+Navigate to **http://localhost:8000** in your browser.
+
+---
+
+### Option B: Docker Deployment
+
+Run the complete platform inside an isolated container with one command:
+
+```bash
+docker-compose up --build
 ```
 
-### 3. Open Dashboard
-Navigate to **http://localhost:8000** in your browser.
+Access the dashboard at **http://localhost:8000**. All incident snapshots and CSV logs are persisted to `./alerts` on your host machine.
 
 ---
 
 ## 🎮 Industry Modes
 
-### 🛡️ Industrial Safety & PPE Compliance
-- Detects workers (persons) near hazardous zones
-- Geofenced danger areas with real-time intrusion alerts
-- Auto-captures violation snapshots as evidence
+```
++-------------------+---------------------------------------------------+
+| Mode              | Features & Focus                                  |
++-------------------+---------------------------------------------------+
+| 🛡️ Safety         | Worker detection, restricted machinery boundary  |
+|                   | breaches, automated snapshot capture.             |
+|                   |                                                   |
+| 🚦 Traffic        | Bi-directional tripwire counting (IN vs OUT),     |
+|                   | vehicle classification (car/truck/bus/bike).      |
+|                   |                                                   |
+| 👥 Retail         | Customer foot-traffic entrance counting, dwell    |
+|                   | time spatial heatmaps, queue density.             |
+|                   |                                                   |
+| 🚨 Security       | High-security polygon geofence intrusion alarm,  |
+|                   | visual perimeter flashing, and audit logging.     |
++-------------------+---------------------------------------------------+
+```
 
-### 🚦 Smart Traffic & Fleet Analytics
-- Bi-directional vehicle counting (IN/OUT) via tripwire lines
-- Vehicle classification: car, truck, bus, motorcycle, bicycle
-- Motion vector trails for flow visualization
+---
 
-### 👥 Retail & Crowd Spatial Intelligence
-- Customer foot-traffic counting at store entrances
-- Dwell-time heatmaps for zone occupancy analysis
-- Checkout and display area monitoring
+## 🔌 REST API Reference
 
-### 🚨 Perimeter Defense & Intrusion Detection
-- Interactive polygon geofencing for restricted areas
-- Person + vehicle detection with perimeter breach alerts
-- Snapshot evidence gallery with CSV audit log
+| Method | Endpoint | Description |
+|:---:|---|---|
+| `GET` | `/` | Control Room Dashboard UI |
+| `GET` | `/video_feed` | Low-latency MJPEG video stream |
+| `GET` | `/api/status` | Real-time telemetry (FPS, tracks, counts, inference ms) |
+| `GET` | `/api/events` | Recent incident & violation log |
+| `GET` | `/api/modes` | Available pre-configured industry presets |
+| `GET` | `/api/snapshot` | Download current frame as high-res JPEG |
+| `POST` | `/api/mode` | Switch operational mode (`{"mode": "safety"}`) |
+| `POST` | `/api/model` | Hot-swap YOLO model (`{"model": "yolov8s"}`) |
+| `POST` | `/api/source` | Switch video source (camera index, MP4 file, or RTSP URL) |
+| `POST` | `/api/config` | Update display settings (`show_trails`, `show_heatmap`, etc.) |
+| `POST` | `/api/zones` | Add custom polygon geofence zone dynamically |
+| `DELETE` | `/api/zones/{id}` | Remove a geofence zone by ID |
+| `POST` | `/api/tripwires` | Add custom tripwire line dynamically |
+| `DELETE` | `/api/tripwires/{id}`| Remove a tripwire line by ID |
+| `POST` | `/api/reset_counters`| Reset all counters and incidents |
+
+---
+
+## 🧪 Testing
+
+The repository comes with a full pytest suite covering tracking math, geometry, and REST API endpoints:
+
+```bash
+python -m pytest -p no:asyncio -v tests/
+```
+
+Expected output:
+```
+tests/test_api.py::test_api_status PASSED                                [  7%]
+tests/test_api.py::test_api_modes_list PASSED                            [ 14%]
+tests/test_api.py::test_api_mode_switching PASSED                        [ 21%]
+tests/test_api.py::test_api_config_update PASSED                         [ 28%]
+tests/test_api.py::test_api_custom_zones PASSED                          [ 35%]
+tests/test_api.py::test_api_custom_tripwires PASSED                      [ 42%]
+tests/test_api.py::test_api_snapshot PASSED                              [ 50%]
+tests/test_spatial.py::test_line_segment_intersection PASSED             [ 57%]
+tests/test_spatial.py::test_crossing_direction_in_out PASSED             [ 64%]
+tests/test_spatial.py::test_geofence_point_in_polygon PASSED             [ 71%]
+tests/test_spatial.py::test_heatmap_accumulator PASSED                   [ 78%]
+tests/test_tracker.py::test_iou_calculation PASSED                       [ 85%]
+tests/test_tracker.py::test_tracker_creation_and_update PASSED           [ 92%]
+tests/test_tracker.py::test_tracker_missed_and_cleanup PASSED            [100%]
+============================= 14 passed in 6.28s ==============================
+```
 
 ---
 
 ## ⌨️ Keyboard Shortcuts
 
 | Key | Action |
-|-----|--------|
-| `Space` | Pause / Resume |
-| `S` | Download Snapshot |
-| `R` | Reset All Counters |
-| `H` | Toggle Heatmap |
-| `T` | Toggle Motion Trails |
-| `1` | Safety Mode |
-| `2` | Traffic Mode |
-| `3` | Retail Mode |
-| `4` | Security Mode |
+|:---:|---|
+| <kbd>Space</kbd> | Pause / Resume Video Feed |
+| <kbd>1</kbd> – <kbd>4</kbd> | Switch Modes (*1: Safety, 2: Traffic, 3: Retail, 4: Security*) |
+| <kbd>S</kbd> | Download High-Resolution Snapshot |
+| <kbd>R</kbd> | Reset All Counters & Incidents |
+| <kbd>E</kbd> | Export Incident Audit Log to CSV |
+| <kbd>H</kbd> | Toggle Spatial Heatmap Overlay |
+| <kbd>T</kbd> | Toggle Motion Trails |
+| <kbd>?</kbd> | Open Shortcuts Reference Modal |
 
 ---
 
@@ -116,8 +209,16 @@ Navigate to **http://localhost:8000** in your browser.
 ```
 yolo-vision-ai/
 ├── app.py                      # FastAPI application (REST + MJPEG stream)
+├── benchmark.py                # Automated latency & hardware benchmark suite
+├── run.py                      # One-click browser & server launcher
+├── start.bat                   # Windows batch file launcher
 ├── requirements.txt            # Python dependencies
-├── README.md                   # This file
+├── Dockerfile                  # Production container image
+├── docker-compose.yml          # Container orchestration
+├── pytest.ini                  # Pytest configuration
+├── README.md                   # Project documentation & showcases
+├── BENCHMARK.md                # Generated hardware benchmark scorecard
+├── .github/workflows/ci.yml    # GitHub Actions automated CI/CD pipeline
 ├── core/
 │   ├── __init__.py
 │   ├── detector.py             # YOLO inference engine wrapper
@@ -125,64 +226,28 @@ yolo-vision-ai/
 │   ├── spatial_analytics.py    # Tripwires, geofences, heatmaps
 │   ├── violation_manager.py    # Incident & alert management
 │   ├── renderer.py             # HUD overlay & visualization renderer
+│   ├── simulator.py            # High-fidelity procedural test stream
 │   └── modes/
 │       ├── __init__.py
 │       └── presets.py          # Industry mode configurations
+├── tests/
+│   ├── test_tracker.py         # Unit tests for tracker & IoU
+│   ├── test_spatial.py         # Unit tests for line crossing & polygons
+│   └── test_api.py             # Integration tests for FastAPI endpoints
 ├── static/
-│   ├── css/
-│   │   └── style.css           # Dark control room theme
-│   └── js/
-│       └── app.js              # Dashboard frontend logic
+│   ├── css/style.css           # Dark glassmorphism control room theme
+│   └── js/app.js               # Dashboard frontend logic & Chart.js
 ├── templates/
 │   └── index.html              # Control room dashboard template
-├── alerts/                     # Auto-generated incident snapshots & CSV audit log
-└── samples/                    # Sample videos for testing
+└── alerts/                     # Auto-generated incident snapshots & CSV audit log
 ```
-
----
-
-## 🔌 API Reference
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/` | Dashboard UI |
-| `GET` | `/video_feed` | MJPEG video stream |
-| `GET` | `/api/status` | System status & metrics |
-| `GET` | `/api/events` | Recent incident log |
-| `GET` | `/api/modes` | Available mode presets |
-| `GET` | `/api/snapshot` | Download current frame |
-| `POST` | `/api/mode` | Switch analytics mode |
-| `POST` | `/api/model` | Switch YOLO model |
-| `POST` | `/api/source` | Change video source |
-| `POST` | `/api/config` | Update display config |
-| `POST` | `/api/reset_counters` | Reset all counters |
-
----
-
-## 📊 Technical Highlights
-
-### Multi-Object Tracking Algorithm
-- **Centroid + IoU hybrid** cost matrix with class-aware penalty
-- **Greedy assignment** with distance threshold gating
-- **Persistent track IDs** with configurable miss tolerance
-- **Motion trail** ring buffer (30-frame history per track)
-
-### Spatial Analytics Math
-- **Line-crossing detection**: CCW-based segment intersection test + 2D cross product for IN/OUT direction
-- **Zone intrusion**: OpenCV `pointPolygonTest` on both footprint (bottom-center) and centroid
-- **Heatmap**: Gaussian-accumulated temporal decay with JET colormap
-
-### Performance
-- YOLOv8n: ~25-40 FPS on CPU (640px inference)
-- YOLOv8s: ~15-25 FPS on CPU
-- GPU acceleration: automatic when CUDA available
 
 ---
 
 ## 📜 License
 
-MIT License — free for commercial and academic use.
+This project is licensed under the **MIT License** — free for academic, hackathon, commercial, and enterprise deployment.
 
 ---
 
-*Built with ❤️ 
+*Built with ❤️ by [kamalesh404](https://github.com/kamalesh404)*
