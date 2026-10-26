@@ -56,6 +56,10 @@ class TripwireLine:
         self.out_count = 0
         self.history_events.clear()
 
+    def intersect(self, p1: tuple, p2: tuple) -> bool:
+        """Check if an arbitrary line segment intersects this tripwire line."""
+        return line_segments_intersect(self.pt1, self.pt2, p1, p2)
+
     def check_crossings(self, tracks: list):
         events = []
         for t in tracks:
