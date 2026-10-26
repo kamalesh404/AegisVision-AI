@@ -71,6 +71,8 @@ class ZoneAddRequest(BaseModel):
     label: str = "Custom Restricted Zone"
     points: list[list[int]]
     color: Optional[list[int]] = [0, 0, 255]
+    dwell_threshold_sec: Optional[float] = 0.0
+    max_occupancy: Optional[int] = 0
 
 
 class TripwireAddRequest(BaseModel):
@@ -349,7 +351,7 @@ def _pipeline_generate():
             for ev in crossing_events:
                 # Record incident
                 state.incident_mgr.record(
-                    event_type=f"TRIPWIRE_CROSSING",
+                    event_type="TRIPWIRE_CROSSING",
                     label=tw.label,
                     track_id=ev.get("track_id"),
                     direction=ev.get("direction", ""),
@@ -363,7 +365,7 @@ def _pipeline_generate():
             for track in intrusions:
                 severity = preset.get("violation_severity", "CRITICAL")
                 state.incident_mgr.record_incident(
-                    event_type=f"RESTRICTED_ZONE_BREACH",
+                    event_type="RESTRICTED_ZONE_BREACH",
                     severity=severity,
                     track=track,
                     zone_or_line=zone.label,
@@ -618,6 +620,8 @@ async def api_add_zone(body: ZoneAddRequest):
         polygon_points=body.points,
         label=body.label,
         color=tuple(body.color or [0, 0, 255]),
+        dwell_threshold_sec=body.dwell_threshold_sec or 0.0,
+        max_occupancy=body.max_occupancy or 0,
     )
     state.zones.append(new_zone)
     return JSONResponse({"status": "ok", "zone_id": zone_id, "label": new_zone.label})
@@ -667,6 +671,41 @@ async def api_delete_tripwire(line_id: str):
     """Remove a tripwire line by ID."""
     state.tripwires = [tw for tw in state.tripwires if tw.line_id != line_id]
     return JSONResponse({"status": "ok", "deleted": line_id})
+
+
+@app.get("/api/analytics/dwell")
+async def api_get_dwell_analytics():
+    """Return live dwell time statistics and loitering metrics for all zones."""
+    results = []
+    for z in state.zones:
+        dwell_map = {tid: z.get_dwell_time(tid) for tid in z.active_intrusions}
+        results.append({
+            "zone_id": z.zone_id,
+            "label": z.label,
+            "dwell_threshold_sec": z.dwell_threshold_sec,
+            "active_occupants": len(z.active_intrusions),
+            "loitering_incidents": z.loitering_incidents,
+            "current_dwell_times": dwell_map,
+        })
+    return JSONResponse({"dwell_analytics": results})
+
+
+@app.get("/api/analytics/occupancy")
+async def api_get_occupancy_analytics():
+    """Return real-time capacity and occupancy status across all monitored zones."""
+    results = []
+    for z in state.zones:
+        breach = z.check_occupancy_breach()
+        results.append({
+            "zone_id": z.zone_id,
+            "label": z.label,
+            "current_occupancy": len(z.active_intrusions),
+            "max_capacity": z.max_occupancy,
+            "is_breached": breach is not None,
+            "breach_details": breach,
+            "area_px": round(z.area, 1),
+        })
+    return JSONResponse({"occupancy_analytics": results})
 
 
 if __name__ == "__main__":
