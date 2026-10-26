@@ -6,12 +6,11 @@ Generates an enterprise-ready Markdown performance report.
 import time
 import sys
 import numpy as np
-import cv2
 import psutil
 
 from core.detector import YOLOEngine
 from core.tracker import CentroidIoUTracker
-from core.spatial_analytics import TripwireLine, GeofenceZone, HeatmapAccumulator
+from core.spatial_analytics import TripwireLine, GeofenceZone
 
 def run_benchmark(num_frames=60, resolution=(640, 480)):
     print("=" * 70)
@@ -89,9 +88,10 @@ def run_benchmark(num_frames=60, resolution=(640, 480)):
     for pt in points:
         if zone.contains_point(pt):
             inside_count += 1
+        _ = tw.intersect((pt[0], 0), (pt[0], 480))
     poly_dt = time.perf_counter() - t0
     ops_per_sec = 50000 / poly_dt
-    print(f"      ✓ Point-in-Polygon: {ops_per_sec:,.0f} checks / second")
+    print(f"      ✓ Point-in-Polygon & Line Intersect: {ops_per_sec:,.0f} checks / second")
 
     # Summary Markdown Output
     report = f"""# 📊 AegisVision AI — Performance & Hardware Benchmark Report

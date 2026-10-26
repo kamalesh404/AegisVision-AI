@@ -158,6 +158,9 @@ class AegisVisionApp {
     /** @type {Set<string>} Set of already-rendered event IDs to detect new rows */
     this.renderedEventIds = new Set();
 
+    /** @type {boolean} Guard to avoid firing toast bursts during initial load */
+    this._hasLoadedEvents = false;
+
     /** Professional colour palette for doughnut chart segments */
     this.CLASS_COLORS = [
       '#00b4d8', '#00e676', '#ff9100', '#e040fb', '#ffea00',
@@ -251,6 +254,9 @@ class AegisVisionApp {
 
     // Incident table
     this.$incidentTbody = document.getElementById('incident-tbody') || document.getElementById('incidentTableBody');
+
+    // Spatial & Capacity Telemetry Container
+    this.$zoneTelemetryContainer = document.getElementById('zoneTelemetryContainer');
   }
 
 
@@ -524,6 +530,7 @@ class AegisVisionApp {
       this._syncConfigState(s);
       this._updateClassChart(s);
       this._updateCrossingChart(s);
+      this._pollSpatialAnalytics();
     } catch (err) {
       console.warn('[AegisVision] Status poll error:', err);
     }
@@ -687,6 +694,80 @@ class AegisVisionApp {
       this.crossingChart.data.datasets[0].data = [];
       this.crossingChart.data.datasets[1].data = [];
       this.crossingChart.update();
+    }
+  }
+
+
+  /* -----------------------------------------------------------------------
+   *  Spatial Analytics & Capacity Telemetry
+   * --------------------------------------------------------------------- */
+
+  /**
+   * Poll live zone capacity and dwell analytics endpoints and update telemetry widget.
+   */
+  async _pollSpatialAnalytics() {
+    if (!this.$zoneTelemetryContainer) return;
+    try {
+      const [occResp, dwellResp] = await Promise.all([
+        this._get('/api/analytics/occupancy'),
+        this._get('/api/analytics/dwell')
+      ]);
+
+      const occList = occResp?.occupancy_analytics || [];
+      const dwellList = dwellResp?.dwell_analytics || [];
+      const dwellMap = new Map(dwellList.map((d) => [d.zone_id, d]));
+
+      if (occList.length === 0) {
+        this.$zoneTelemetryContainer.innerHTML = '<div class="zone-empty-text">No active zones monitored in current mode</div>';
+        return;
+      }
+
+      let html = '';
+      for (const zone of occList) {
+        const dwell = dwellMap.get(zone.zone_id) || {};
+        const isBreached = zone.is_breached;
+        const currentOcc = zone.current_occupancy || 0;
+        const maxCap = zone.max_capacity || 0;
+        const areaPx = zone.area_px || 0;
+        const dwellThresh = dwell.dwell_threshold_sec || 0;
+        const loiterCount = dwell.loitering_incidents || 0;
+
+        const pct = maxCap > 0 ? Math.min(100, Math.round((currentOcc / maxCap) * 100)) : (currentOcc > 0 ? 100 : 0);
+
+        let maxDwellSec = 0;
+        if (dwell.current_dwell_times) {
+          const vals = Object.values(dwell.current_dwell_times);
+          if (vals.length > 0) maxDwellSec = Math.max(...vals);
+        }
+
+        html += `
+          <div class="zone-card-item ${isBreached ? 'breached' : ''}">
+            <div class="zone-card-header">
+              <span>${zone.label}</span>
+              <div class="zone-card-badges">
+                ${isBreached ? '<span class="zone-badge-pill danger">BREACH</span>' : ''}
+                ${loiterCount > 0 ? `<span class="zone-badge-pill warning">${loiterCount} LOITER</span>` : ''}
+                <span class="zone-badge-pill ${currentOcc > 0 ? 'success' : ''}">${currentOcc} active</span>
+              </div>
+            </div>
+
+            ${maxCap > 0 ? `
+              <div class="progress-bar ${isBreached ? 'danger' : ''}">
+                <div class="progress-fill" style="width: ${pct}%"></div>
+              </div>
+            ` : ''}
+
+            <div class="zone-meta-row">
+              <span>${maxCap > 0 ? `Cap: ${currentOcc}/${maxCap} (${pct}%)` : 'Uncapped zone'} · ${Number(areaPx).toLocaleString()} px²</span>
+              ${dwellThresh > 0 ? `<span class="zone-dwell-badge">${maxDwellSec > 0 ? `${maxDwellSec.toFixed(1)}s` : '0s'} / ${dwellThresh}s limit</span>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      this.$zoneTelemetryContainer.innerHTML = html;
+    } catch (err) {
+      console.warn('[AegisVision] Spatial analytics poll error:', err);
     }
   }
 
@@ -1042,6 +1123,15 @@ class AegisVisionApp {
 
       if (isNew) {
         row.classList.add('incident-row-enter');
+        if (this._hasLoadedEvents) {
+          if (ev.type === 'CAPACITY_BREACH') {
+            Toast.show(`⚠️ CAPACITY BREACH: ${ev.zone_or_line || 'Zone capacity exceeded'}`, 'error', 4500);
+          } else if (ev.type === 'LOITERING_DETECTED') {
+            Toast.show(`⏱️ LOITERING ALERT: Track #${ev.track_id} in ${ev.zone_or_line || 'Zone'}`, 'warning', 4000);
+          } else if (ev.severity === 'CRITICAL') {
+            Toast.show(`🚨 ALERT: ${ev.type} in ${ev.zone_or_line || 'Monitored area'}`, 'error', 4000);
+          }
+        }
       }
 
       row.innerHTML = `
@@ -1069,6 +1159,7 @@ class AegisVisionApp {
 
     // Update rendered IDs set
     this.renderedEventIds = newEventIds;
+    this._hasLoadedEvents = true;
   }
 
   /**

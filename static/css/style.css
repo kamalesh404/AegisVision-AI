@@ -2231,3 +2231,96 @@ button:focus-visible,
   --accent-glow-strong: rgba(124, 77, 255, 0.35);
   --border-accent: rgba(124, 77, 255, 0.2);
 }
+
+
+/* ============================================================
+   22. ZONE TELEMETRY & OCCUPANCY WIDGET
+   ============================================================ */
+.zone-telemetry-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.zone-card-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all var(--transition);
+}
+
+.zone-card-item:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-card-hover);
+}
+
+.zone-card-item.breached {
+  border-color: var(--danger);
+  box-shadow: 0 0 12px var(--danger-glow);
+}
+
+.zone-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.zone-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zone-badge-pill {
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
+.zone-badge-pill.danger {
+  background: var(--danger-glow);
+  color: var(--danger);
+  border: 1px solid rgba(255, 68, 68, 0.3);
+}
+
+.zone-badge-pill.warning {
+  background: var(--warning-glow);
+  color: var(--warning);
+  border: 1px solid rgba(255, 170, 0, 0.3);
+}
+
+.zone-badge-pill.success {
+  background: var(--success-glow);
+  color: var(--success);
+}
+
+.zone-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.zone-dwell-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent);
+}
+
+.zone-empty-text {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 12px 0;
+}

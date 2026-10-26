@@ -32,7 +32,7 @@ MODE_PRESETS = {
             {"id": "safety_line_1", "label": "Hazard Boundary", "pt1_pct": [0.1, 0.5], "pt2_pct": [0.9, 0.5]}
         ],
         "default_zones": [
-            {"id": "danger_zone_1", "label": "⚠️ Danger Zone", "polygon_pct": [[0.6, 0.3], [0.95, 0.3], [0.95, 0.85], [0.6, 0.85]], "color": [0, 0, 255]}
+            {"id": "danger_zone_1", "label": "⚠️ Danger Zone", "polygon_pct": [[0.6, 0.3], [0.95, 0.3], [0.95, 0.85], [0.6, 0.85]], "color": [0, 0, 255], "dwell_threshold_sec": 4.0, "max_occupancy": 1}
         ],
         "violation_severity": "CRITICAL",
         "theme_accent": "#FF4444",
@@ -73,8 +73,8 @@ MODE_PRESETS = {
             {"id": "entrance_line", "label": "🚪 Store Entrance", "pt1_pct": [0.3, 0.1], "pt2_pct": [0.7, 0.1]}
         ],
         "default_zones": [
-            {"id": "checkout_zone", "label": "💳 Checkout Area", "polygon_pct": [[0.05, 0.6], [0.4, 0.6], [0.4, 0.95], [0.05, 0.95]], "color": [255, 165, 0]},
-            {"id": "display_zone", "label": "🏷️ Display Zone", "polygon_pct": [[0.5, 0.2], [0.9, 0.2], [0.9, 0.55], [0.5, 0.55]], "color": [0, 200, 255]}
+            {"id": "checkout_zone", "label": "💳 Checkout Area", "polygon_pct": [[0.05, 0.6], [0.4, 0.6], [0.4, 0.95], [0.05, 0.95]], "color": [255, 165, 0], "dwell_threshold_sec": 12.0, "max_occupancy": 3},
+            {"id": "display_zone", "label": "🏷️ Display Zone", "polygon_pct": [[0.5, 0.2], [0.9, 0.2], [0.9, 0.55], [0.5, 0.55]], "color": [0, 200, 255], "dwell_threshold_sec": 8.0, "max_occupancy": 5}
         ],
         "violation_severity": "INFO",
         "theme_accent": "#2196F3",
@@ -95,7 +95,7 @@ MODE_PRESETS = {
             {"id": "perimeter_line", "label": "🔒 Perimeter Line", "pt1_pct": [0.0, 0.45], "pt2_pct": [1.0, 0.45]}
         ],
         "default_zones": [
-            {"id": "restricted_1", "label": "🚫 Restricted Area", "polygon_pct": [[0.15, 0.15], [0.85, 0.15], [0.85, 0.85], [0.15, 0.85]], "color": [0, 0, 255]}
+            {"id": "restricted_1", "label": "🚫 Restricted Area", "polygon_pct": [[0.15, 0.15], [0.85, 0.15], [0.85, 0.85], [0.15, 0.85]], "color": [0, 0, 255], "dwell_threshold_sec": 5.0, "max_occupancy": 0}
         ],
         "violation_severity": "CRITICAL",
         "theme_accent": "#FF1744",

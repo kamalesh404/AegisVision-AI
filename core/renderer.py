@@ -158,13 +158,27 @@ class HUDRenderer:
             cv2.putText(frame, zone.label, (centroid[0] - lw // 2, centroid[1]),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
 
-            # Intrusion count
-            count_text = f"Intrusions: {zone.total_intrusions} | Active: {len(zone.active_intrusions)}"
-            cv2.putText(frame, count_text, (centroid[0] - lw // 2, centroid[1] + 20),
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.4, (200, 200, 200), 1, cv2.LINE_AA)
+            # Intrusion & capacity telemetry
+            is_breached = zone.check_occupancy_breach() is not None
+            if zone.max_occupancy > 0:
+                count_text = f"Occ: {len(zone.active_intrusions)}/{zone.max_occupancy}"
+                if is_breached:
+                    count_text += " [BREACH]"
+            else:
+                count_text = f"Active: {len(zone.active_intrusions)}"
+            
+            if zone.dwell_threshold_sec > 0:
+                count_text += f" | Limit: {int(zone.dwell_threshold_sec)}s"
 
-            # If any active intrusions, flash border
-            if zone.active_intrusions:
+            text_color = (0, 0, 255) if is_breached else (200, 200, 200)
+            cv2.putText(frame, count_text, (centroid[0] - lw // 2, centroid[1] + 20),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.4, text_color, 1, cv2.LINE_AA)
+
+            # If breached or active intrusion, flash border
+            if is_breached:
+                border_color = (0, 0, 255)
+                border_thickness = 4
+            elif zone.active_intrusions:
                 border_color = (0, 0, 255)
                 border_thickness = 3
             else:

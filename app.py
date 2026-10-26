@@ -237,7 +237,9 @@ class AppState:
                         zone_id=zd.get("id", f"zone_{len(self.zones)+1}"),
                         polygon_points=pixel_pts,
                         label=zd.get("label", "Restricted Area"),
-                        color=color
+                        color=color,
+                        dwell_threshold_sec=float(zd.get("dwell_threshold_sec", 0.0)),
+                        max_occupancy=int(zd.get("max_occupancy", 0)),
                     )
                 )
 
@@ -359,7 +361,7 @@ def _pipeline_generate():
                     severity="INFO"
                 )
 
-        # 5. Geofence Zone Intrusions
+        # 5. Geofence Zone Intrusions & Advanced Spatial Telemetry
         for zone in state.zones:
             intrusions = zone.update_intrusions(tracks)
             for track in intrusions:
@@ -371,6 +373,36 @@ def _pipeline_generate():
                     zone_or_line=zone.label,
                     frame=frame
                 )
+
+            # Evaluate dwell time & loitering threshold
+            if zone.dwell_threshold_sec > 0:
+                for track in tracks:
+                    if track.track_id in zone.active_intrusions:
+                        loiter_alert = zone.check_loitering(track.track_id)
+                        if loiter_alert:
+                            state.incident_mgr.record_incident(
+                                event_type="LOITERING_DETECTED",
+                                severity="WARNING",
+                                track=track,
+                                zone_or_line=f"{zone.label} ({round(loiter_alert['dwell_sec'], 1)}s)",
+                                frame=frame
+                            )
+
+            # Evaluate capacity limits
+            breach = zone.check_occupancy_breach()
+            if breach and not getattr(zone, "_breach_reported", False):
+                zone._breach_reported = True
+                active_t = next((t for t in tracks if t.track_id in zone.active_intrusions), None)
+                if active_t:
+                    state.incident_mgr.record_incident(
+                        event_type="CAPACITY_BREACH",
+                        severity="CRITICAL",
+                        track=active_t,
+                        zone_or_line=f"{zone.label} ({breach['current']}/{breach['max']})",
+                        frame=frame
+                    )
+            elif not breach:
+                zone._breach_reported = False
 
         # 6. Spatial Heatmap Accumulator
         if state.show_heatmap:
