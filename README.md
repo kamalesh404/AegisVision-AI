@@ -3,7 +3,7 @@
 > **Industry-grade, competition-winning Computer Vision platform powered by YOLOv8 + FastAPI + Real-Time Multi-Object Tracking**
 
 [![CI Pipeline](https://github.com/kamalesh404/AegisVision-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/kamalesh404/AegisVision-AI/actions)
-![Tests](https://img.shields.io/badge/Tests-14%20Passed-brightgreen?logo=pytest)
+![Tests](https://img.shields.io/badge/Tests-22%20Passed-brightgreen?logo=pytest)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![YOLOv8](https://img.shields.io/badge/YOLOv8-Ultralytics-00FFFF?logo=yolo)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?logo=fastapi)
@@ -25,7 +25,10 @@
 | 🖥️ **Control Room Dashboard** | Dark glassmorphism UI with real-time Chart.js telemetry, stat cards, and incident table |
 | 🎮 **Procedural Simulation** | Built-in synthetic test stream generator for instant zero-camera demonstrations |
 | 🐳 **Production Docker** | Multi-stage Docker container with healthcheck and docker-compose orchestration |
-| 🧪 **Tested & Automated** | 100% pytest test suite + GitHub Actions CI/CD pipeline |
+| ⏱️ **Dwell Time & Loitering** | Continuous dwell duration tracking with automatic loitering threshold alerts |
+| 👥 **Capacity & Occupancy** | Real-time zone capacity tracking with dynamic overcrowding breach triggers |
+| 🧭 **Kinematics & Velocity** | 2D velocity vectors in px/s, scalar speed, 8-way compass heading, and anomaly detection |
+| 🧪 **Tested & Automated** | 22/22 pytest unit test suite + GitHub Actions CI/CD pipeline |
 
 ---
 
