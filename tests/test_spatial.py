@@ -1,16 +1,13 @@
 """
 Unit tests for spatial mathematics: tripwire ray crossing, polygon geofencing, heatmaps.
 """
-import pytest
 import numpy as np
 from core.spatial_analytics import (
     line_segments_intersect,
     get_crossing_direction,
-    TripwireLine,
     GeofenceZone,
     HeatmapAccumulator
 )
-from core.tracker import TrackedObject
 
 def test_line_segment_intersection():
     # Perpendicular intersecting segments

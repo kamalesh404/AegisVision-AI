@@ -1,8 +1,7 @@
 """
 Unit tests for CentroidIoUTracker and TrackedObject.
 """
-import pytest
-from core.tracker import CentroidIoUTracker, calculate_iou, TrackedObject
+from core.tracker import CentroidIoUTracker, calculate_iou
 
 def test_iou_calculation():
     boxA = [0, 0, 10, 10]
