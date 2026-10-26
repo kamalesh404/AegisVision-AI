@@ -2,7 +2,6 @@
 YOLO Detection Engine — wraps Ultralytics YOLOv8/v11 for inference.
 Supports dynamic model switching, class filtering, and device selection.
 """
-import os
 import time
 import threading
 from ultralytics import YOLO

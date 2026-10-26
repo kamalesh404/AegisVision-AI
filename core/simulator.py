@@ -6,7 +6,6 @@ Guarantees out-of-the-box demonstration even without an active webcam.
 import cv2
 import numpy as np
 import math
-import time
 
 class SyntheticFeedGenerator:
     def __init__(self, width=640, height=480):
