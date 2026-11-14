@@ -107,3 +107,14 @@ class IncidentManager:
 
     def clear(self):
         self.events.clear()
+
+
+    def build_webhook_payload(self, event: dict) -> dict:
+        """Format enterprise webhook JSON envelope for SIEM ingestion."""
+        return {
+            "source": "AegisVision-AI",
+            "event_id": event.get("event_id"),
+            "severity": event.get("severity", "WARNING"),
+            "timestamp": event.get("timestamp"),
+            "details": event
+        }
