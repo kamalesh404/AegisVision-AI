@@ -180,3 +180,18 @@ class CentroidIoUTracker:
                 self.next_id += 1
 
         return list(self.tracks.values())
+
+
+def vectorized_iou_batch(boxesA, boxesB):
+    """Compute pairwise IoU matrix across two bounding box arrays."""
+    if len(boxesA) == 0 or len(boxesB) == 0:
+        return np.zeros((len(boxesA), len(boxesB)))
+    xA = np.maximum(boxesA[:, None, 0], boxesB[None, :, 0])
+    yA = np.maximum(boxesA[:, None, 1], boxesB[None, :, 1])
+    xB = np.minimum(boxesA[:, None, 2], boxesB[None, :, 2])
+    yB = np.minimum(boxesA[:, None, 3], boxesB[None, :, 3])
+    interArea = np.maximum(0, xB - xA) * np.maximum(0, yB - yA)
+    boxAArea = (boxesA[:, 2] - boxesA[:, 0]) * (boxesA[:, 3] - boxesA[:, 1])
+    boxBArea = (boxesB[:, 2] - boxesB[:, 0]) * (boxesB[:, 3] - boxesB[:, 1])
+    iou = interArea / (boxAArea[:, None] + boxBArea[None, :] - interArea + 1e-6)
+    return iou
