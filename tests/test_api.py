@@ -79,3 +79,15 @@ def test_api_snapshot(client):
     assert r.status_code == 200
     assert r.headers["content-type"] == "image/jpeg"
     assert len(r.content) > 500
+
+def test_api_health(client):
+    r = client.get("/api/health")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["status"] in {"healthy", "degraded"}
+    assert "uptime_sec" in data
+    assert "demo_mode" in data
+
+def test_api_rejects_unknown_model(client):
+    r = client.post("/api/model", json={"model": "unknown-model"})
+    assert r.status_code == 400

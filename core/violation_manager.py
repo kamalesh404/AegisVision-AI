@@ -113,7 +113,7 @@ class IncidentManager:
         """Format enterprise webhook JSON envelope for SIEM ingestion."""
         return {
             "source": "AegisVision-AI",
-            "event_id": event.get("event_id"),
+            "event_id": event.get("id") or event.get("event_id"),
             "severity": event.get("severity", "WARNING"),
             "timestamp": event.get("timestamp"),
             "details": event

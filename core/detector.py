@@ -45,6 +45,10 @@ class YOLOEngine:
         self.switch_model(model_name)
 
     def switch_model(self, model_key: str):
+        if model_key not in self.AVAILABLE_MODELS:
+            raise ValueError(
+                f"Unknown model '{model_key}'. Available: {sorted(self.AVAILABLE_MODELS)}"
+            )
         if model_key == self.model_key:
             return
         with self.lock:

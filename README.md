@@ -1,5 +1,7 @@
 # 🛡️ AegisVision AI — Enterprise Real-Time Spatial & Video Analytics
 
+> **Version 2.0** — Production health telemetry, stricter model validation, resilient loitering analytics, and hardened incident payloads.
+
 > **Industry-grade, competition-winning Computer Vision platform powered by YOLOv8 + FastAPI + Real-Time Multi-Object Tracking**
 
 [![CI Pipeline](https://github.com/kamalesh404/AegisVision-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/kamalesh404/AegisVision-AI/actions)

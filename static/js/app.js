@@ -6,7 +6,7 @@
  * Handles status polling, mode switching, video feed, configuration,
  * Chart.js visualizations, incident logging, keyboard shortcuts, and toast notifications.
  *
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 /* =========================================================================
@@ -568,7 +568,9 @@ class AegisVisionApp {
    */
   _updateModelInfo(s) {
     if (this.$modelInfo && s.model_info) {
-      const info = typeof s.model_info === 'string' ? s.model_info : (s.model_info.name || JSON.stringify(s.model_info));
+      const info = typeof s.model_info === 'string'
+        ? s.model_info
+        : (s.model_info.label || s.model_info.name || s.model_info.key || JSON.stringify(s.model_info));
       this.$modelInfo.textContent = info;
     }
   }

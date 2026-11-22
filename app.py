@@ -120,6 +120,8 @@ class AppState:
         self.last_frame: Optional[np.ndarray] = None
         self._frame_times: deque = deque(maxlen=30)
         self.demo_mode: bool = False
+        self.started_at: float = time.time()
+        self.last_frame_at: Optional[float] = None
 
     def open_source(self, source: object = None) -> bool:
         """Open video source (webcam index, file path, RTSP stream, or 'demo')."""
@@ -281,7 +283,7 @@ async def lifespan(application: FastAPI):
 app = FastAPI(
     title="AegisVision AI",
     description="Enterprise Real-Time YOLO Video Analytics & Spatial Intelligence Platform",
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan,
 )
 
@@ -376,17 +378,18 @@ def _pipeline_generate():
 
             # Evaluate dwell time & loitering threshold
             if zone.dwell_threshold_sec > 0:
-                for track in tracks:
-                    if track.track_id in zone.active_intrusions:
-                        loiter_alert = zone.check_loitering(track.track_id)
-                        if loiter_alert:
-                            state.incident_mgr.record_incident(
-                                event_type="LOITERING_DETECTED",
-                                severity="WARNING",
-                                track=track,
-                                zone_or_line=f"{zone.label} ({round(loiter_alert['dwell_sec'], 1)}s)",
-                                frame=frame
-                            )
+                loiter_alerts = zone.check_loitering(tracks)
+                tracks_by_id = {track.track_id: track for track in tracks}
+                for loiter_alert in loiter_alerts:
+                    track = tracks_by_id.get(loiter_alert["track_id"])
+                    if track:
+                        state.incident_mgr.record_incident(
+                            event_type="LOITERING_DETECTED",
+                            severity="WARNING",
+                            track=track,
+                            zone_or_line=f"{zone.label} ({round(loiter_alert['dwell_sec'], 1)}s)",
+                            frame=frame
+                        )
 
             # Evaluate capacity limits
             breach = zone.check_occupancy_breach()
@@ -445,6 +448,7 @@ def _pipeline_generate():
         )
 
         state.last_frame = rendered
+        state.last_frame_at = time.time()
         state.total_frames += 1
         state.update_fps()
 
@@ -477,6 +481,24 @@ async def index(request: Request):
     )
 
 
+@app.get("/api/health")
+async def api_health():
+    now = time.time()
+    frame_fresh = state.last_frame_at is not None and (now - state.last_frame_at) < 5.0
+    return JSONResponse({
+        "status": "healthy" if frame_fresh or state.demo_mode else "degraded",
+        "uptime_sec": round(now - state.started_at, 1),
+        "source": str(state.video_source),
+        "demo_mode": state.demo_mode,
+        "total_frames": state.total_frames,
+        "last_frame_age_sec": (
+            round(now - state.last_frame_at, 2)
+            if state.last_frame_at is not None
+            else None
+        ),
+    })
+
+
 @app.get("/api/status")
 async def api_status():
     tw_stats = [{"label": tw.label, "in_count": tw.in_count, "out_count": tw.out_count} for tw in state.tripwires]
@@ -489,6 +511,7 @@ async def api_status():
     return JSONResponse({
         "mode": state.current_mode,
         "fps": state.fps,
+        "uptime_sec": round(time.time() - state.started_at, 1),
         "track_count": len(state.tracker.tracks),
         "inference_ms": state.engine.last_inference_ms,
         "model": state.engine.model_name,
