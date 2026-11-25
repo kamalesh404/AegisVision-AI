@@ -355,3 +355,11 @@ class HeatmapAccumulator:
         mask = norm_heat < 20
         colored_heatmap[mask] = 0
         return colored_heatmap
+
+
+def estimate_tripwire_crossing_speed(p1: tuple, p2: tuple, fps: float = 30.0, px_to_meter: float = 0.05) -> float:
+    """Estimate velocity in km/h between two centroid observations across frames."""
+    import math
+    dist_px = math.hypot(p2[0] - p1[0], p2[1] - p1[1])
+    speed_mps = (dist_px * px_to_meter) * fps
+    return round(speed_mps * 3.6, 1)
