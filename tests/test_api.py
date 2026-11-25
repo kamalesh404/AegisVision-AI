@@ -91,3 +91,12 @@ def test_api_health(client):
 def test_api_rejects_unknown_model(client):
     r = client.post("/api/model", json={"model": "unknown-model"})
     assert r.status_code == 400
+
+
+def test_clamp_bbox_bounds():
+    from core.detector import clamp_bbox_coordinates
+    clamped = clamp_bbox_coordinates([-10, -5, 1950, 1100], 1920, 1080)
+    assert clamped[0] == 0
+    assert clamped[1] == 0
+    assert clamped[2] == 1919
+    assert clamped[3] == 1079
