@@ -114,3 +114,13 @@ class YOLOEngine:
             "last_ms": self.last_inference_ms,
             "num_classes": len(self.class_names),
         }
+
+
+def clamp_bbox_coordinates(bbox: list, width: int, height: int) -> list:
+    """Clamp detection bounding box [x1, y1, x2, y2] to frame boundaries."""
+    return [
+        max(0, min(width - 1, bbox[0])),
+        max(0, min(height - 1, bbox[1])),
+        max(0, min(width - 1, bbox[2])),
+        max(0, min(height - 1, bbox[3]))
+    ]
